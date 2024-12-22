@@ -5,20 +5,20 @@
 
 Please refer to the upstream for setup and configuration. https://github.com/sqlc-dev/sqlc-gen-typescript
 
-### Usage
+## Usage
 
-Go to releases and pick the one you want to use (preferably the latest one)
+Go to [Releases](https://github.com/eEQK/sqlc-gen-typescript/releases) and pick the one you want to use (preferably the latest one)
 
 Example (plugins section only):
 ```yml
 plugins:
 - name: ts
   wasm:
-    url: https://github.com/eEQK/sqlc-gen-typescript/releases/download/nightly-29d84fa/sqlc-gen-typescript_dev.wasm
-    sha256: e0925a08f6e4cc32372fc2746e2034bb37aa8c3f59d993e475813a315a19d5eb
+    url: https://github.com/eEQK/sqlc-gen-typescript/releases/download/v20241222.095711_4e4caaa/sqlc-gen-typescript_dev.wasm
+    sha256: 9600a25c0d013d6d1bc69b824cea19acd5e054024704f0cb70092a8722a2b9a1
 ```
 
-### Changes in this fork
+## Changes in this fork
 
 #### Do not export queries
 Makes LSP suggestions less cluttered

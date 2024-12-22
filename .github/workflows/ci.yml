@@ -30,14 +30,14 @@ jobs:
       working-directory: examples
     - name: Set outputs
       id: vars
-      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      run: echo "tag_name=v$(date +'%Y%m%d.%H%M%S')_$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: nightly-${{ steps.vars.outputs.sha_short }}
+        tag_name: ${{ steps.vars.outputs.tag_name }}
         release_name: Nightly Release
         draft: false
         prerelease: false
@@ -62,16 +62,16 @@ jobs:
     - name: Update Release Description with SHA256
       uses: actions/github-script@v4
       env:
+        tag: ${{ steps.vars.outputs.tag_name }}
         sha256: ${{ steps.calculate_sha256.outputs.sha256 }}
-        sha256Short: ${{ steps.vars.outputs.sha_short }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         script: |
-          const { sha256, sha256Short } = process.env;
+          const { tag, sha256 } = process.env;
           const { data: release } = await github.repos.getReleaseByTag({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            tag: `nightly-${sha256Short}`
+            tag: tag
           });
           await github.repos.updateRelease({
             owner: context.repo.owner,
@@ -81,7 +81,7 @@ jobs:
           plugins:
           - name: ts
             wasm:
-              url: https://github.com/eEQK/sqlc-gen-typescript/releases/download/nightly-${sha256Short}/sqlc-gen-typescript_dev.wasm
+              url: https://github.com/eEQK/sqlc-gen-typescript/releases/download/${tag}/sqlc-gen-typescript_dev.wasm
               sha256: ${sha256}
           \`\`\``
           });
