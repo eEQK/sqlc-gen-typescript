@@ -1,3 +1,7 @@
+--@namespace Authors
+--@foo bar
+
+-- just a comment
 -- name: GetAuthor :one
 SELECT * FROM authors
 WHERE id = $1 LIMIT 1;
@@ -18,10 +22,6 @@ RETURNING *;
 DELETE FROM authors
 WHERE id = $1;
 
--- name: Authors_Get :one
-SELECT * FROM authors
-WHERE id = $1 LIMIT 1;
-
--- name: Authors_List :many
+-- name: Nested_List :many
 SELECT * FROM authors
 ORDER BY name;

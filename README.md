@@ -24,6 +24,29 @@ plugins:
 Makes LSP suggestions less cluttered
 
 #### Export queries in a module
+
+```sql
+--@namespace Authors
+
+-- name: Get :one
+SELECT * FROM authors
+WHERE id = $1 LIMIT 1;
+
+-- name: List :many
+SELECT * FROM authors
+ORDER BY name;
+```
+
+```typescript
+const someAuthor = Authors.get(sql);
+const authors = Authors.list(sql);
+```
+
+The namespace option:
+    * applies to the entire file
+    * must appear above the first query
+
+#### Export specific queries in a module
 If a query name contains `_` then it will be exported within a module
 
 The format is: `ModuleName_FunctionName`
@@ -36,18 +59,6 @@ WHERE id = $1 LIMIT 1;
 -- name: Authors_List :many
 SELECT * FROM authors
 ORDER BY name;
-```
-
-```typescript
-export module Authors {
-    const getQuery = `...`;
-    export async function get(...) { ... }
-}
-
-export module Authors {
-    const listQuery = `...`;
-    export async function list(...) { ... }
-}
 ```
 
 ```typescript

@@ -5,6 +5,7 @@ import {
   TypeNode,
   factory,
   FunctionDeclaration,
+  Statement,
 } from "typescript";
 
 import { Parameter, Column, Query } from "../gen/plugin/codegen_pb";
@@ -111,7 +112,7 @@ export class Driver {
   }
 
   preamble(queries: Query[]) {
-    const imports: Node[] = [
+    const imports: Statement[] = [
       factory.createImportDeclaration(
         undefined,
         factory.createImportClause(
