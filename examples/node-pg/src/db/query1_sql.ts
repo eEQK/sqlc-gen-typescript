@@ -6,8 +6,8 @@ interface Client {
     query: (config: QueryArrayConfig) => Promise<QueryArrayResult>;
 }
 
-export module Authors {
-    const getAuthorQuery = `-- name: Authors_GetAuthor :one
+export module Read {
+    const getAuthorQuery = `-- name: Read_GetAuthor :one
 SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1`;
     export interface GetAuthorArgs {
@@ -34,7 +34,7 @@ WHERE id = $1 LIMIT 1`;
             bio: row[2]
         };
     }
-    const listAuthorsQuery = `-- name: Authors_ListAuthors :many
+    const listAuthorsQuery = `-- name: Read_ListAuthors :many
 SELECT id, name, bio FROM authors
 ORDER BY name`;
     export interface ListAuthorsRow {
@@ -56,53 +56,8 @@ ORDER BY name`;
             };
         });
     }
-    const createAuthorQuery = `-- name: Authors_CreateAuthor :one
-INSERT INTO authors (
-  name, bio
-) VALUES (
-  $1, $2
-)
-RETURNING id, name, bio`;
-    export interface CreateAuthorArgs {
-        name: string;
-        bio: string | null;
-    }
-    export interface CreateAuthorRow {
-        id: string;
-        name: string;
-        bio: string | null;
-    }
-    export async function createAuthor(client: Client, args: CreateAuthorArgs): Promise<CreateAuthorRow | null> {
-        const result = await client.query({
-            text: createAuthorQuery,
-            values: [args.name, args.bio],
-            rowMode: "array"
-        });
-        if (result.rows.length !== 1) {
-            return null;
-        }
-        const row = result.rows[0];
-        return {
-            id: row[0],
-            name: row[1],
-            bio: row[2]
-        };
-    }
-    const deleteAuthorQuery = `-- name: Authors_DeleteAuthor :exec
-DELETE FROM authors
-WHERE id = $1`;
-    export interface DeleteAuthorArgs {
-        id: string;
-    }
-    export async function deleteAuthor(client: Client, args: DeleteAuthorArgs): Promise<void> {
-        await client.query({
-            text: deleteAuthorQuery,
-            values: [args.id],
-            rowMode: "array"
-        });
-    }
     export module Nested {
-        const listQuery = `-- name: Authors_Nested_List :many
+        const listQuery = `-- name: Read_Nested_List :many
 SELECT id, name, bio FROM authors
 ORDER BY name`;
         export interface ListRow {

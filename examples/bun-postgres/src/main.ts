@@ -1,12 +1,13 @@
 import postgres from "postgres";
 
-import { Authors } from "./db/query_sql";
+import { Read } from "./db/query1_sql";
+import { Update } from "./db/query2_sql";
 
 async function main() {
   const sql = postgres(process.env["DATABASE_URL"] ?? "");
 
   // Create an author
-  const author = await Authors.createAuthor(sql, {
+  const author = await Update.createAuthor(sql, {
     name: "Seal",
     bio: "Kissed from a rose",
   });
@@ -16,18 +17,18 @@ async function main() {
   console.log(author);
 
   // List the authors
-  const authors = await Authors.listAuthors(sql);
+  const authors = await Read.listAuthors(sql);
   console.log(authors);
 
   // Get that author
-  const seal = await Authors.getAuthor(sql, { id: author.id });
+  const seal = await Read.getAuthor(sql, { id: author.id });
   if (seal === null) {
     throw new Error("seal not found");
   }
   console.log(seal);
 
   // Delete the author
-  await Authors.deleteAuthor(sql, { id: seal.id });
+  await Update.deleteAuthor(sql, { id: seal.id });
 }
 
 (async () => {

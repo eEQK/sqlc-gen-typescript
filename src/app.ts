@@ -111,7 +111,6 @@ function codegen(input: GenerateRequest): GenerateResponse {
   }
 
   const driver = createNodeGenerator(options);
-  const fileNs = input.queries[0].comments.find((c) => c.startsWith("@namespace"))?.split(" ")?.pop();
 
   // TODO: Verify options, parse them from protobuf honestly
 
@@ -126,6 +125,8 @@ function codegen(input: GenerateRequest): GenerateResponse {
   }
 
   for (const [filename, queries] of querymap.entries()) {
+    const fileNs = queries[0].comments.find((c) => c.startsWith("@namespace"))?.split(" ")?.pop();
+
     let nodes: Statement[] = [];
 
     for (const query of queries) {
@@ -225,15 +226,11 @@ ${query.text.trim()}`
       }
     }
 
-    const fileOpts = input.queries[0].comments.filter((c) => c.startsWith("@"));
-
-    const namespaceOpt = fileOpts.find((c) => c.startsWith("@namespace"));
-    if (namespaceOpt) {
-      const namespace = namespaceOpt.split(" ")[1];
+    if (fileNs) {
       nodes = [
         factory.createModuleDeclaration(
           [factory.createToken(SyntaxKind.ExportKeyword),],
-          factory.createIdentifier(namespace),
+          factory.createIdentifier(fileNs),
           factory.createModuleBlock(nodes)
         )
       ]

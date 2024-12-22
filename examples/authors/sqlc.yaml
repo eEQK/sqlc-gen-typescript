@@ -4,7 +4,7 @@ cloud:
 sql:
 - name: postgresql
   schema: "postgresql/schema.sql"
-  queries: "postgresql/query.sql"
+  queries: "postgresql/query*.sql"
   engine: "postgresql"
   database:
     managed: true

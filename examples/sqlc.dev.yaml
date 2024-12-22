@@ -5,7 +5,7 @@ plugins:
     url: file://plugin.wasm
 sql:
 - schema: "authors/postgresql/schema.sql"
-  queries: "authors/postgresql/query.sql"
+  queries: "authors/postgresql/query*.sql"
   engine: "postgresql"
   codegen:
   - plugin: ts
@@ -14,7 +14,7 @@ sql:
       runtime: node
       driver: pg
 - schema: "authors/postgresql/schema.sql"
-  queries: "authors/postgresql/query.sql"
+  queries: "authors/postgresql/query*.sql"
   engine: "postgresql"
   codegen:
   - plugin: ts
@@ -23,7 +23,7 @@ sql:
       runtime: bun
       driver: pg
 - schema: "authors/postgresql/schema.sql"
-  queries: "authors/postgresql/query.sql"
+  queries: "authors/postgresql/query*.sql"
   engine: "postgresql"
   codegen:
   - plugin: ts
@@ -32,7 +32,7 @@ sql:
       runtime: node
       driver: postgres
 - schema: "authors/postgresql/schema.sql"
-  queries: "authors/postgresql/query.sql"
+  queries: "authors/postgresql/query*.sql"
   engine: "postgresql"
   codegen:
   - plugin: ts
