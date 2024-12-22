@@ -20,10 +20,10 @@ plugins:
 
 ## Changes in this fork
 
-#### Do not export queries
+### Do not export queries
 Makes LSP suggestions less cluttered
 
-#### Export queries in a module
+### Export queries in a module
 
 ```sql
 --@namespace Authors
@@ -43,10 +43,10 @@ const authors = Authors.list(sql);
 ```
 
 The namespace option:
-    * applies to the entire file
-    * must appear above the first query
+* applies to the entire file
+* must appear above the first query
 
-#### Export specific queries in a module
+### Export specific queries in a module
 If a query name contains `_` then it will be exported within a module
 
 The format is: `ModuleName_FunctionName`
