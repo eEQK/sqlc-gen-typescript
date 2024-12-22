@@ -13,12 +13,68 @@ jobs:
       with:
         sqlc-version: '1.24.0'
     - uses: actions/setup-node@v4
-    - run: wget https://github.com/bytecodealliance/javy/releases/download/v1.2.0/javy-x86_64-linux-v1.2.0.gz
-    - run: gzip -d javy-x86_64-linux-v1.2.0.gz
-    - run: chmod +x javy-x86_64-linux-v1.2.0
+    - run: wget https://github.com/bytecodealliance/javy/releases/download/v4.0.0/javy-x86_64-linux-v4.0.0.gz
+    - run: gzip -d javy-x86_64-linux-v4.0.0.gz
+    - run: chmod +x javy-x86_64-linux-v4.0.0
     - run: npm install
     - run: npx tsc --noEmit
     - run: npx esbuild --bundle src/app.ts --tree-shaking=true --format=esm --target=es2020 --outfile=out.js
-    - run: ./javy-x86_64-linux-v1.2.0 compile out.js -o examples/plugin.wasm
+    - run: ./javy-x86_64-linux-v4.0.0 build out.js -o examples/plugin.wasm
+    - run: cp examples/plugin.wasm examples/sqlc-gen-typescript_dev.wasm
+    - id: calculate_sha256
+      run: |
+        sha256sum examples/sqlc-gen-typescript_dev.wasm > examples/sqlc-gen-typescript_dev.wasm.sha256
+        SHA256=$(cat examples/sqlc-gen-typescript_dev.wasm.sha256 | awk '{ print $1 }')
+        echo "::set-output name=sha256::$SHA256"
     - run: sqlc -f sqlc.dev.yaml diff
       working-directory: examples
+    - name: Set outputs
+      id: vars
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: nightly-${{ steps.vars.outputs.sha_short }}
+        release_name: Nightly Release
+        draft: false
+        prerelease: false
+    - name: Upload Plugin WASM to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: examples/sqlc-gen-typescript_dev.wasm
+        asset_name: sqlc-gen-typescript_dev.wasm
+        asset_content_type: application/wasm
+    - name: Upload Plugin WASM SHA256 to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: examples/sqlc-gen-typescript_dev.wasm.sha256
+        asset_name: sqlc-gen-typescript_dev.wasm.sha256
+        asset_content_type: text/plain
+    - name: Update Release Description with SHA256
+      uses: actions/github-script@v4
+      env:
+        sha256: ${{ steps.calculate_sha256.outputs.sha256 }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        script: |
+          const { sha256 } = process.env;
+          const { data: release } = await github.repos.getReleaseByTag({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag: `nightly-${{ steps.vars.outputs.sha_short }}`
+          });
+          await github.repos.updateRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            release_id: release.id,
+            body: `SHA256 Checksum: ${sha256}\n\n${release.body}`
+          });
