@@ -2,15 +2,15 @@
 --@foo bar
 
 -- just a comment
--- name: GetAuthor :one
+-- name: Authors_GetAuthor :one
 SELECT * FROM authors
 WHERE id = $1 LIMIT 1;
 
--- name: ListAuthors :many
+-- name: Authors_ListAuthors :many
 SELECT * FROM authors
 ORDER BY name;
 
--- name: CreateAuthor :one
+-- name: Authors_CreateAuthor :one
 INSERT INTO authors (
   name, bio
 ) VALUES (
@@ -18,10 +18,10 @@ INSERT INTO authors (
 )
 RETURNING *;
 
--- name: DeleteAuthor :exec
+-- name: Authors_DeleteAuthor :exec
 DELETE FROM authors
 WHERE id = $1;
 
--- name: Nested_List :many
+-- name: Authors_Nested_List :many
 SELECT * FROM authors
 ORDER BY name;

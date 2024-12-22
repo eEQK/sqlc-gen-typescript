@@ -111,6 +111,7 @@ function codegen(input: GenerateRequest): GenerateResponse {
   }
 
   const driver = createNodeGenerator(options);
+  const fileNs = input.queries[0].comments.find((c) => c.startsWith("@namespace"))?.split(" ")?.pop();
 
   // TODO: Verify options, parse them from protobuf honestly
 
@@ -140,10 +141,11 @@ function codegen(input: GenerateRequest): GenerateResponse {
         colmap.set(column.name, count + 1);
       }
 
-      const [namespace, name] = query.name.indexOf('_') > -1
-        ? query.name.split("_")
-        : [undefined, query.name];
-      const lowerName = name[0].toLowerCase() + name.slice(1);
+      const name = fileNs ? query.name.replace(`${fileNs}_`, "") : query.name;
+      const [queryNs, nameWithoutFileNs] = name.indexOf('_') > -1
+        ? name.split("_")
+        : [undefined, name];
+      const lowerName = nameWithoutFileNs[0].toLowerCase() + nameWithoutFileNs.slice(1);
       const textName = `${lowerName}Query`;
 
       const nodesToPush: Statement[] = [];
@@ -159,24 +161,24 @@ ${query.text.trim()}`
       let argIface = undefined;
       let returnIface = undefined;
       if (query.params.length > 0) {
-        argIface = `${name}Args`;
+        argIface = `${nameWithoutFileNs}Args`;
         nodesToPush.push(argsDecl(argIface, driver, query.params));
       }
       if (query.columns.length > 0) {
-        returnIface = `${name}Row`;
+        returnIface = `${nameWithoutFileNs}Row`;
         nodesToPush.push(rowDecl(returnIface, driver, query.columns));
       }
 
       switch (query.cmd) {
         case ":exec": {
           nodesToPush.push(
-            driver.execDecl(lowerName, textName, argIface, query.params, namespace)
+            driver.execDecl(lowerName, textName, argIface, query.params, queryNs)
           );
           break;
         }
         case ":execlastid": {
           nodesToPush.push(
-            driver.execlastidDecl(lowerName, textName, argIface, query.params, namespace)
+            driver.execlastidDecl(lowerName, textName, argIface, query.params, queryNs)
           );
           break;
         }
@@ -189,7 +191,7 @@ ${query.text.trim()}`
               returnIface ?? "void",
               query.params,
               query.columns,
-              namespace
+              queryNs
             )
           );
           break;
@@ -203,18 +205,18 @@ ${query.text.trim()}`
               returnIface ?? "void",
               query.params,
               query.columns,
-              namespace
+              queryNs
             )
           );
           break;
         }
       }
       if (nodesToPush) {
-        if (namespace) {
+        if (queryNs) {
           nodes.push(
             factory.createModuleDeclaration(
               [factory.createToken(SyntaxKind.ExportKeyword),],
-              factory.createIdentifier(namespace),
+              factory.createIdentifier(queryNs),
               factory.createModuleBlock(nodesToPush)
             ))
         } else {

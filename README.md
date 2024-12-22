@@ -32,7 +32,16 @@ Makes LSP suggestions less cluttered
 SELECT * FROM authors
 WHERE id = $1 LIMIT 1;
 
--- name: List :many
+-- file namespace will be removed from queries, in case
+-- you have the same query in multiple files
+--
+-- name: Authors_List :many
+SELECT * FROM authors
+ORDER BY name;
+
+-- you can also nest namespaces
+--
+-- name: Authors_Nested_List :many
 SELECT * FROM authors
 ORDER BY name;
 ```
@@ -40,6 +49,7 @@ ORDER BY name;
 ```typescript
 const someAuthor = Authors.get(sql);
 const authors = Authors.list(sql);
+const nested = Authors.Nested.list(sql);
 ```
 
 The namespace option:

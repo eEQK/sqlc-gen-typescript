@@ -7,7 +7,7 @@ interface Client {
 }
 
 export module Authors {
-    const getAuthorQuery = `-- name: GetAuthor :one
+    const getAuthorQuery = `-- name: Authors_GetAuthor :one
 SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1`;
     export interface GetAuthorArgs {
@@ -34,7 +34,7 @@ WHERE id = $1 LIMIT 1`;
             bio: row[2]
         };
     }
-    const listAuthorsQuery = `-- name: ListAuthors :many
+    const listAuthorsQuery = `-- name: Authors_ListAuthors :many
 SELECT id, name, bio FROM authors
 ORDER BY name`;
     export interface ListAuthorsRow {
@@ -56,7 +56,7 @@ ORDER BY name`;
             };
         });
     }
-    const createAuthorQuery = `-- name: CreateAuthor :one
+    const createAuthorQuery = `-- name: Authors_CreateAuthor :one
 INSERT INTO authors (
   name, bio
 ) VALUES (
@@ -88,7 +88,7 @@ RETURNING id, name, bio`;
             bio: row[2]
         };
     }
-    const deleteAuthorQuery = `-- name: DeleteAuthor :exec
+    const deleteAuthorQuery = `-- name: Authors_DeleteAuthor :exec
 DELETE FROM authors
 WHERE id = $1`;
     export interface DeleteAuthorArgs {
@@ -102,7 +102,7 @@ WHERE id = $1`;
         });
     }
     export module Nested {
-        const listQuery = `-- name: Nested_List :many
+        const listQuery = `-- name: Authors_Nested_List :many
 SELECT id, name, bio FROM authors
 ORDER BY name`;
         export interface ListRow {
