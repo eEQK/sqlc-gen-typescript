@@ -159,11 +159,11 @@ ${query.text}`
       let argIface = undefined;
       let returnIface = undefined;
       if (query.params.length > 0) {
-        argIface = `${query.name}Args`;
+        argIface = `${name}Args`;
         nodesToPush.push(argsDecl(argIface, driver, query.params));
       }
       if (query.columns.length > 0) {
-        returnIface = `${query.name}Row`;
+        returnIface = `${name}Row`;
         nodesToPush.push(rowDecl(returnIface, driver, query.columns));
       }
 

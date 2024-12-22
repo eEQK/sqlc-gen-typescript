@@ -118,15 +118,15 @@ export module Authors {
     const getQuery = `-- name: Authors_Get :one
 SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1`;
-    export interface Authors_GetArgs {
+    export interface GetArgs {
         id: string;
     }
-    export interface Authors_GetRow {
+    export interface GetRow {
         id: string;
         name: string;
         bio: string | null;
     }
-    export async function get(client: Client, args: Authors_GetArgs): Promise<Authors_GetRow | null> {
+    export async function get(client: Client, args: GetArgs): Promise<GetRow | null> {
         const result = await client.query({
             text: getQuery,
             values: [args.id],
@@ -148,12 +148,12 @@ export module Authors {
     const listQuery = `-- name: Authors_List :many
 SELECT id, name, bio FROM authors
 ORDER BY name`;
-    export interface Authors_ListRow {
+    export interface ListRow {
         id: string;
         name: string;
         bio: string | null;
     }
-    export async function list(client: Client): Promise<Authors_ListRow[]> {
+    export async function list(client: Client): Promise<ListRow[]> {
         const result = await client.query({
             text: listQuery,
             values: [],

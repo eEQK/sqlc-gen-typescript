@@ -101,15 +101,15 @@ export module Authors {
     const getQuery = `-- name: Authors_Get :one
 SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1`;
-    export interface Authors_GetArgs {
+    export interface GetArgs {
         id: string;
     }
-    export interface Authors_GetRow {
+    export interface GetRow {
         id: string;
         name: string;
         bio: string | null;
     }
-    export async function get(sql: Sql, args: Authors_GetArgs): Promise<Authors_GetRow | null> {
+    export async function get(sql: Sql, args: GetArgs): Promise<GetRow | null> {
         const rows = await sql.unsafe(getQuery, [args.id]).values();
         if (rows.length !== 1) {
             return null;
@@ -130,12 +130,12 @@ export module Authors {
     const listQuery = `-- name: Authors_List :many
 SELECT id, name, bio FROM authors
 ORDER BY name`;
-    export interface Authors_ListRow {
+    export interface ListRow {
         id: string;
         name: string;
         bio: string | null;
     }
-    export async function list(sql: Sql): Promise<Authors_ListRow[]> {
+    export async function list(sql: Sql): Promise<ListRow[]> {
         return (await sql.unsafe(listQuery, []).values()).map(row => ({
             id: row[0],
             name: row[1],
