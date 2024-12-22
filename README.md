@@ -49,3 +49,8 @@ export module Authors {
     export async function list(...) { ... }
 }
 ```
+
+```typescript
+const someAuthor = Authors.get(sql);
+const authors = Authors.list(sql);
+```
