@@ -6,129 +6,21 @@ interface Client {
     query: (config: QueryArrayConfig) => Promise<QueryArrayResult>;
 }
 
-const getAuthorQuery = `-- name: GetAuthor :one
-SELECT id, name, bio FROM authors
-WHERE id = $1 LIMIT 1`;
-
-export interface GetAuthorArgs {
-    id: string;
-}
-
-export interface GetAuthorRow {
-    id: string;
-    name: string;
-    bio: string | null;
-}
-
-export async function getAuthor(client: Client, args: GetAuthorArgs): Promise<GetAuthorRow | null> {
-    const result = await client.query({
-        text: getAuthorQuery,
-        values: [args.id],
-        rowMode: "array"
-    });
-    if (result.rows.length !== 1) {
-        return null;
-    }
-    const row = result.rows[0];
-    return {
-        id: row[0],
-        name: row[1],
-        bio: row[2]
-    };
-}
-
-const listAuthorsQuery = `-- name: ListAuthors :many
-SELECT id, name, bio FROM authors
-ORDER BY name`;
-
-export interface ListAuthorsRow {
-    id: string;
-    name: string;
-    bio: string | null;
-}
-
-export async function listAuthors(client: Client): Promise<ListAuthorsRow[]> {
-    const result = await client.query({
-        text: listAuthorsQuery,
-        values: [],
-        rowMode: "array"
-    });
-    return result.rows.map(row => {
-        return {
-            id: row[0],
-            name: row[1],
-            bio: row[2]
-        };
-    });
-}
-
-const createAuthorQuery = `-- name: CreateAuthor :one
-INSERT INTO authors (
-  name, bio
-) VALUES (
-  $1, $2
-)
-RETURNING id, name, bio`;
-
-export interface CreateAuthorArgs {
-    name: string;
-    bio: string | null;
-}
-
-export interface CreateAuthorRow {
-    id: string;
-    name: string;
-    bio: string | null;
-}
-
-export async function createAuthor(client: Client, args: CreateAuthorArgs): Promise<CreateAuthorRow | null> {
-    const result = await client.query({
-        text: createAuthorQuery,
-        values: [args.name, args.bio],
-        rowMode: "array"
-    });
-    if (result.rows.length !== 1) {
-        return null;
-    }
-    const row = result.rows[0];
-    return {
-        id: row[0],
-        name: row[1],
-        bio: row[2]
-    };
-}
-
-const deleteAuthorQuery = `-- name: DeleteAuthor :exec
-DELETE FROM authors
-WHERE id = $1`;
-
-export interface DeleteAuthorArgs {
-    id: string;
-}
-
-export async function deleteAuthor(client: Client, args: DeleteAuthorArgs): Promise<void> {
-    await client.query({
-        text: deleteAuthorQuery,
-        values: [args.id],
-        rowMode: "array"
-    });
-}
-
 export module Authors {
-    const getQuery = `-- name: Authors_Get :one
+    const getAuthorQuery = `-- name: GetAuthor :one
 SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1`;
-    export interface GetArgs {
+    export interface GetAuthorArgs {
         id: string;
     }
-    export interface GetRow {
+    export interface GetAuthorRow {
         id: string;
         name: string;
         bio: string | null;
     }
-    export async function get(client: Client, args: GetArgs): Promise<GetRow | null> {
+    export async function getAuthor(client: Client, args: GetAuthorArgs): Promise<GetAuthorRow | null> {
         const result = await client.query({
-            text: getQuery,
+            text: getAuthorQuery,
             values: [args.id],
             rowMode: "array"
         });
@@ -142,20 +34,17 @@ WHERE id = $1 LIMIT 1`;
             bio: row[2]
         };
     }
-}
-
-export module Authors {
-    const listQuery = `-- name: Authors_List :many
+    const listAuthorsQuery = `-- name: ListAuthors :many
 SELECT id, name, bio FROM authors
 ORDER BY name`;
-    export interface ListRow {
+    export interface ListAuthorsRow {
         id: string;
         name: string;
         bio: string | null;
     }
-    export async function list(client: Client): Promise<ListRow[]> {
+    export async function listAuthors(client: Client): Promise<ListAuthorsRow[]> {
         const result = await client.query({
-            text: listQuery,
+            text: listAuthorsQuery,
             values: [],
             rowMode: "array"
         });
@@ -166,6 +55,75 @@ ORDER BY name`;
                 bio: row[2]
             };
         });
+    }
+    const createAuthorQuery = `-- name: CreateAuthor :one
+INSERT INTO authors (
+  name, bio
+) VALUES (
+  $1, $2
+)
+RETURNING id, name, bio`;
+    export interface CreateAuthorArgs {
+        name: string;
+        bio: string | null;
+    }
+    export interface CreateAuthorRow {
+        id: string;
+        name: string;
+        bio: string | null;
+    }
+    export async function createAuthor(client: Client, args: CreateAuthorArgs): Promise<CreateAuthorRow | null> {
+        const result = await client.query({
+            text: createAuthorQuery,
+            values: [args.name, args.bio],
+            rowMode: "array"
+        });
+        if (result.rows.length !== 1) {
+            return null;
+        }
+        const row = result.rows[0];
+        return {
+            id: row[0],
+            name: row[1],
+            bio: row[2]
+        };
+    }
+    const deleteAuthorQuery = `-- name: DeleteAuthor :exec
+DELETE FROM authors
+WHERE id = $1`;
+    export interface DeleteAuthorArgs {
+        id: string;
+    }
+    export async function deleteAuthor(client: Client, args: DeleteAuthorArgs): Promise<void> {
+        await client.query({
+            text: deleteAuthorQuery,
+            values: [args.id],
+            rowMode: "array"
+        });
+    }
+    export module Nested {
+        const listQuery = `-- name: Nested_List :many
+SELECT id, name, bio FROM authors
+ORDER BY name`;
+        export interface ListRow {
+            id: string;
+            name: string;
+            bio: string | null;
+        }
+        export async function list(client: Client): Promise<ListRow[]> {
+            const result = await client.query({
+                text: listQuery,
+                values: [],
+                rowMode: "array"
+            });
+            return result.rows.map(row => {
+                return {
+                    id: row[0],
+                    name: row[1],
+                    bio: row[2]
+                };
+            });
+        }
     }
 }
 

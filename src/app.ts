@@ -47,7 +47,7 @@ interface Options {
 }
 
 interface Driver {
-  preamble: (queries: Query[]) => Node[];
+  preamble: (queries: Query[]) => Statement[];
   columnType: (c?: Column) => TypeNode;
   execDecl: (
     name: string,
@@ -125,7 +125,7 @@ function codegen(input: GenerateRequest): GenerateResponse {
   }
 
   for (const [filename, queries] of querymap.entries()) {
-    const nodes = driver.preamble(queries);
+    let nodes: Statement[] = [];
 
     for (const query of queries) {
       const colmap = new Map<string, number>();
@@ -152,7 +152,7 @@ function codegen(input: GenerateRequest): GenerateResponse {
         queryDecl(
           textName,
           `-- name: ${query.name} ${query.cmd}
-${query.text}`
+${query.text.trim()}`
         )
       );
 
@@ -220,15 +220,31 @@ ${query.text}`
         } else {
           nodes.push(...nodesToPush);
         }
-
-        files.push(
-          new File({
-            name: `${filename.replace(".", "_")}.ts`,
-            contents: new TextEncoder().encode(printNode(nodes)),
-          })
-        );
       }
     }
+
+    const fileOpts = input.queries[0].comments.filter((c) => c.startsWith("@"));
+
+    const namespaceOpt = fileOpts.find((c) => c.startsWith("@namespace"));
+    if (namespaceOpt) {
+      const namespace = namespaceOpt.split(" ")[1];
+      nodes = [
+        factory.createModuleDeclaration(
+          [factory.createToken(SyntaxKind.ExportKeyword),],
+          factory.createIdentifier(namespace),
+          factory.createModuleBlock(nodes)
+        )
+      ]
+    }
+
+    nodes.unshift(...driver.preamble(queries))
+
+    files.push(
+      new File({
+        name: `${filename.replace(".", "_")}.ts`,
+        contents: new TextEncoder().encode(printNode(nodes)),
+      })
+    );
   }
 
   return new GenerateResponse({
