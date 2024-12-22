@@ -63,18 +63,25 @@ jobs:
       uses: actions/github-script@v4
       env:
         sha256: ${{ steps.calculate_sha256.outputs.sha256 }}
+        sha256Short: ${{ steps.vars.outputs.sha_short }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         script: |
-          const { sha256 } = process.env;
+          const { sha256, sha256Short } = process.env;
           const { data: release } = await github.repos.getReleaseByTag({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            tag: `nightly-${{ steps.vars.outputs.sha_short }}`
+            tag: `nightly-${sha256Short}`
           });
           await github.repos.updateRelease({
             owner: context.repo.owner,
             repo: context.repo.repo,
             release_id: release.id,
-            body: `SHA256 Checksum: ${sha256}\n\n${release.body}`
+            body: `\`\`\`yml
+          plugins:
+          - name: ts
+            wasm:
+              url: https://github.com/eEQK/sqlc-gen-typescript/releases/download/nightly-${sha256Short}/sqlc-gen-typescript_dev.wasm
+              sha256: ${sha256}
+          \`\`\``
           });
