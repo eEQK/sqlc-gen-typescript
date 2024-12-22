@@ -15,6 +15,7 @@ import {
   createPrinter,
   createSourceFile,
   factory,
+  Statement,
 } from "typescript";
 
 import {
@@ -52,30 +53,34 @@ interface Driver {
     name: string,
     text: string,
     iface: string | undefined,
-    params: Parameter[]
-  ) => Node;
+    params: Parameter[],
+    namespace?: string,
+  ) => Statement;
   execlastidDecl: (
     name: string,
     text: string,
     iface: string | undefined,
-    params: Parameter[]
-  ) => Node;
+    params: Parameter[],
+    namespace?: string,
+  ) => Statement;
   manyDecl: (
     name: string,
     text: string,
     argIface: string | undefined,
     returnIface: string,
     params: Parameter[],
-    columns: Column[]
-  ) => Node;
+    columns: Column[],
+    namespace?: string,
+  ) => Statement;
   oneDecl: (
     name: string,
     text: string,
     argIface: string | undefined,
     returnIface: string,
     params: Parameter[],
-    columns: Column[]
-  ) => Node;
+    columns: Column[],
+    namespace?: string,
+  ) => Statement;
 }
 
 function createNodeGenerator(options: Options): Driver {
@@ -135,10 +140,15 @@ function codegen(input: GenerateRequest): GenerateResponse {
         colmap.set(column.name, count + 1);
       }
 
-      const lowerName = query.name[0].toLowerCase() + query.name.slice(1);
+      const [namespace, name] = query.name.indexOf('_') > -1
+        ? query.name.split("_")
+        : [undefined, query.name];
+      const lowerName = name[0].toLowerCase() + name.slice(1);
       const textName = `${lowerName}Query`;
 
-      nodes.push(
+      const nodesToPush: Statement[] = [];
+
+      nodesToPush.push(
         queryDecl(
           textName,
           `-- name: ${query.name} ${query.cmd}
@@ -150,54 +160,67 @@ ${query.text}`
       let returnIface = undefined;
       if (query.params.length > 0) {
         argIface = `${query.name}Args`;
-        nodes.push(argsDecl(argIface, driver, query.params));
+        nodesToPush.push(argsDecl(argIface, driver, query.params));
       }
       if (query.columns.length > 0) {
         returnIface = `${query.name}Row`;
-        nodes.push(rowDecl(returnIface, driver, query.columns));
+        nodesToPush.push(rowDecl(returnIface, driver, query.columns));
       }
 
       switch (query.cmd) {
         case ":exec": {
-          nodes.push(
-            driver.execDecl(lowerName, textName, argIface, query.params)
+          nodesToPush.push(
+            driver.execDecl(lowerName, textName, argIface, query.params, namespace)
           );
           break;
         }
         case ":execlastid": {
-          nodes.push(
-            driver.execlastidDecl(lowerName, textName, argIface, query.params)
+          nodesToPush.push(
+            driver.execlastidDecl(lowerName, textName, argIface, query.params, namespace)
           );
           break;
         }
         case ":one": {
-          nodes.push(
+          nodesToPush.push(
             driver.oneDecl(
               lowerName,
               textName,
               argIface,
               returnIface ?? "void",
               query.params,
-              query.columns
+              query.columns,
+              namespace
             )
           );
           break;
         }
         case ":many": {
-          nodes.push(
+          nodesToPush.push(
             driver.manyDecl(
               lowerName,
               textName,
               argIface,
               returnIface ?? "void",
               query.params,
-              query.columns
+              query.columns,
+              namespace
             )
           );
           break;
         }
       }
-      if (nodes) {
+      if (nodesToPush) {
+        if (namespace) {
+          nodes.push(
+            factory.createModuleDeclaration(
+              [factory.createToken(SyntaxKind.ExportKeyword),],
+              factory.createIdentifier(namespace),
+              factory.createModuleBlock(nodesToPush)
+            ))
+        } else {
+          nodes.push(...nodesToPush);
+        }
+
         files.push(
           new File({
             name: `${filename.replace(".", "_")}.ts`,

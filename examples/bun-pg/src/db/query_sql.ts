@@ -114,3 +114,58 @@ export async function deleteAuthor(client: Client, args: DeleteAuthorArgs): Prom
     });
 }
 
+export module Authors {
+    const getQuery = `-- name: Authors_Get :one
+SELECT id, name, bio FROM authors
+WHERE id = $1 LIMIT 1`;
+    export interface Authors_GetArgs {
+        id: string;
+    }
+    export interface Authors_GetRow {
+        id: string;
+        name: string;
+        bio: string | null;
+    }
+    export async function get(client: Client, args: Authors_GetArgs): Promise<Authors_GetRow | null> {
+        const result = await client.query({
+            text: getQuery,
+            values: [args.id],
+            rowMode: "array"
+        });
+        if (result.rows.length !== 1) {
+            return null;
+        }
+        const row = result.rows[0];
+        return {
+            id: row[0],
+            name: row[1],
+            bio: row[2]
+        };
+    }
+}
+
+export module Authors {
+    const listQuery = `-- name: Authors_List :many
+SELECT id, name, bio FROM authors
+ORDER BY name`;
+    export interface Authors_ListRow {
+        id: string;
+        name: string;
+        bio: string | null;
+    }
+    export async function list(client: Client): Promise<Authors_ListRow[]> {
+        const result = await client.query({
+            text: listQuery,
+            values: [],
+            rowMode: "array"
+        });
+        return result.rows.map(row => {
+            return {
+                id: row[0],
+                name: row[1],
+                bio: row[2]
+            };
+        });
+    }
+}
+

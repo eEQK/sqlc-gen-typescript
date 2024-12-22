@@ -97,3 +97,50 @@ export async function deleteAuthor(sql: Sql, args: DeleteAuthorArgs): Promise<vo
     await sql.unsafe(deleteAuthorQuery, [args.id]);
 }
 
+export module Authors {
+    const getQuery = `-- name: Authors_Get :one
+SELECT id, name, bio FROM authors
+WHERE id = $1 LIMIT 1`;
+    export interface Authors_GetArgs {
+        id: string;
+    }
+    export interface Authors_GetRow {
+        id: string;
+        name: string;
+        bio: string | null;
+    }
+    export async function get(sql: Sql, args: Authors_GetArgs): Promise<Authors_GetRow | null> {
+        const rows = await sql.unsafe(getQuery, [args.id]).values();
+        if (rows.length !== 1) {
+            return null;
+        }
+        const row = rows[0];
+        if (!row) {
+            return null;
+        }
+        return {
+            id: row[0],
+            name: row[1],
+            bio: row[2]
+        };
+    }
+}
+
+export module Authors {
+    const listQuery = `-- name: Authors_List :many
+SELECT id, name, bio FROM authors
+ORDER BY name`;
+    export interface Authors_ListRow {
+        id: string;
+        name: string;
+        bio: string | null;
+    }
+    export async function list(sql: Sql): Promise<Authors_ListRow[]> {
+        return (await sql.unsafe(listQuery, []).values()).map(row => ({
+            id: row[0],
+            name: row[1],
+            bio: row[2]
+        }));
+    }
+}
+

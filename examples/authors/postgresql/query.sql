@@ -17,3 +17,11 @@ RETURNING *;
 -- name: DeleteAuthor :exec
 DELETE FROM authors
 WHERE id = $1;
+
+-- name: Authors_Get :one
+SELECT * FROM authors
+WHERE id = $1 LIMIT 1;
+
+-- name: Authors_List :many
+SELECT * FROM authors
+ORDER BY name;
