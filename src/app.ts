@@ -2,33 +2,33 @@
 // javy/dist but esbuild requires the import to be javy/fs
 //
 // @ts-expect-error
-import { readFileSync, writeFileSync, STDIO } from "javy/fs";
+import { STDIO, readFileSync, writeFileSync } from "javy/fs";
 import {
 	EmitHint,
 	NewLineKind,
-	type TypeNode,
-	ScriptKind,
-	ScriptTarget,
-	SyntaxKind,
 	type Node,
 	NodeFlags,
+	ScriptKind,
+	ScriptTarget,
+	type Statement,
+	SyntaxKind,
+	type TypeNode,
 	createPrinter,
 	createSourceFile,
 	factory,
-	type Statement,
 } from "typescript";
 
 import {
+	type Column,
+	File,
 	GenerateRequest,
 	GenerateResponse,
 	type Parameter,
-	type Column,
-	File,
 	type Query,
 } from "./gen/plugin/codegen_pb";
 
-import { argName, colName } from "./drivers/utlis";
 import { Driver as PostgresDriver } from "./drivers/postgres";
+import { argName, colName } from "./drivers/utlis";
 
 // Read input from stdin
 const input = readInput();

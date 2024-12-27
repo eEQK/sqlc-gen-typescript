@@ -2,9 +2,9 @@
 // javy/dist but esbuild requires the import to be javy/fs
 //
 // @ts-expect-error
-import { readFileSync, writeFileSync, STDIO } from "javy/fs";
+import { STDIO, readFileSync, writeFileSync } from "javy/fs";
 
 export function log(msg: string) {
-  const encoder = new TextEncoder();
-  writeFileSync(STDIO.Stderr, encoder.encode(msg));
+	const encoder = new TextEncoder();
+	writeFileSync(STDIO.Stderr, encoder.encode(msg));
 }

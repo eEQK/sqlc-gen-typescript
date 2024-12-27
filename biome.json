@@ -1,0 +1,22 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"formatter": {
+		"enabled": true,
+		"ignore": ["**/db/*_sql.ts"]
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"ignore": ["examples"],
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		}
+	}
+}

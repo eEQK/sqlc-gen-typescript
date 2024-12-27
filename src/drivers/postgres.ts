@@ -1,14 +1,14 @@
 import {
-	SyntaxKind,
+	type FunctionDeclaration,
 	NodeFlags,
+	SyntaxKind,
 	type TypeNode,
 	factory,
-	type FunctionDeclaration,
 } from "typescript";
 
-import type { Parameter, Column } from "../gen/plugin/codegen_pb";
-import { argName, colName } from "./utlis";
+import type { Column, Parameter } from "../gen/plugin/codegen_pb";
 import { log } from "../logger";
+import { argName, colName } from "./utlis";
 
 const typeMapping = {
 	string: [
