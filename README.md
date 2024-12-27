@@ -23,6 +23,38 @@ plugins:
 ### Do not export queries
 Makes LSP suggestions less cluttered
 
+### Returning values directly from selects with single column
+```sql
+-- name: GetName :one
+SELECT name FROM authors
+WHERE id = $1 LIMIT 1;
+```
+
+```typescript
+const name = Authors.get(sql, {id: 1});
+typeof name // string
+```
+
+### Export specific queries in a module
+If a query name contains `_` then it will be exported within a module
+
+The format is: `ModuleName_FunctionName`
+
+```sql
+-- name: Authors_Get :one
+SELECT * FROM authors
+WHERE id = $1 LIMIT 1;
+
+-- name: Authors_List :many
+SELECT * FROM authors
+ORDER BY name;
+```
+
+```typescript
+const someAuthor = Authors.get(sql);
+const authors = Authors.list(sql);
+```
+
 ### Export queries in a module
 
 ```sql
@@ -55,23 +87,3 @@ const nested = Authors.Nested.list(sql);
 The namespace option:
 * applies to the entire file
 * must appear above the first query
-
-### Export specific queries in a module
-If a query name contains `_` then it will be exported within a module
-
-The format is: `ModuleName_FunctionName`
-
-```sql
--- name: Authors_Get :one
-SELECT * FROM authors
-WHERE id = $1 LIMIT 1;
-
--- name: Authors_List :many
-SELECT * FROM authors
-ORDER BY name;
-```
-
-```typescript
-const someAuthor = Authors.get(sql);
-const authors = Authors.list(sql);
-```

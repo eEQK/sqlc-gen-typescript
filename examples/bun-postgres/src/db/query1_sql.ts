@@ -44,6 +44,23 @@ ORDER BY name`;
             bio: row[2]
         }));
     }
+    const getNameByIdQuery = `-- name: GetNameById :one
+SELECT name FROM authors
+where id = $1 limit 1`;
+    export interface GetNameByIdArgs {
+        id: string;
+    }
+    export async function getNameById(sql: Sql, args: GetNameByIdArgs): Promise<string | null> {
+        const rows = await sql.unsafe(getNameByIdQuery, [args.id]).values();
+        if (rows.length !== 1) {
+            return null;
+        }
+        const row = rows[0];
+        if (!row) {
+            return null;
+        }
+        return row[0];
+    }
     export module Nested {
         const listQuery = `-- name: Read_Nested_List :many
 SELECT id, name, bio FROM authors
