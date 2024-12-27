@@ -28,7 +28,7 @@ I've decided to remove other drivers in this fork as I don't have enough capabil
 to also maintain them. As such, only the Postgres database with the `postgres` package is supported
 here. This allows me to iterate faster and introduce more features.
 
-My goal with this fork is to provide a great sqlc experience within TypeScript,
+My goal with this fork is to provide a great sqlc experience with Postgres+TypeScript,
 and I'll focus on achieving that here.
 
 I encourage anyone interested to incorporate changes from this fork into the main repo.
