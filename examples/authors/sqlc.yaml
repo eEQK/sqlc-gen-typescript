@@ -8,9 +8,3 @@ sql:
   engine: "postgresql"
   database:
     managed: true
-- name: mysql
-  schema: "mysql/schema.sql"
-  queries: "mysql/query.sql"
-  engine: "mysql"
-  database:
-    managed: true
