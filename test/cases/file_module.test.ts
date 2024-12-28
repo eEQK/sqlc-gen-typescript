@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, it } from "bun:test";
 import { db, gen, prepare, sql } from "../case";
 
 await prepare(sql`
@@ -14,7 +14,7 @@ await prepare(sql`
     SELECT 1 + 4;
 `);
 
-test("wraps with file-wide namespace", () => {
+it("wraps with file-wide namespace", () => {
 	expect(gen().Queries.q1(db)).resolves.toBe(2);
 	expect(gen().Queries.q2(db)).resolves.toBe(3);
 	expect(gen().Queries.q3(db)).resolves.toBe(4);

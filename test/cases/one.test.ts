@@ -1,5 +1,5 @@
 import { db, gen, prepare, sql } from "../case";
-import { expect, test } from "bun:test";
+import { describe, expect, it } from "bun:test";
 
 await prepare(sql`
     -- name: GetSomeAuthor :one
@@ -8,16 +8,18 @@ await prepare(sql`
     select * from authors where id = @id;
 `);
 
-test("returns complex objects", async () => {
-	const result = await gen().getSomeAuthor(db);
-	expect(result).toMatchObject({
-		id: 1,
-		name: "John Doe",
-		bio: "A mysterious author",
+describe(":one", () => {
+	it("returns complex objects", async () => {
+		const result = await gen().getSomeAuthor(db);
+		expect(result).toMatchObject({
+			id: 1,
+			name: "John Doe",
+			bio: "A mysterious author",
+		});
 	});
-});
 
-test("returns null if no results found", async () => {
-	const result = await gen().getAuthorById(db, { id: 999 });
-	expect(result).toBe(null);
+	it("returns null if no results found", async () => {
+		const result = await gen().getAuthorById(db, { id: 999 });
+		expect(result).toBe(null);
+	});
 });

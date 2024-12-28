@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, it } from "bun:test";
 import { db, gen, prepare, sql } from "../case";
 
 await prepare(sql`
@@ -9,7 +9,7 @@ await prepare(sql`
     SELECT 1 + 2;
 `);
 
-test("wraps with namespaces", () => {
+it("wraps with namespaces", () => {
 	expect(gen().Foo.stuff(db)).resolves.toBe(2);
 	expect(gen().Bar.stuff(db)).resolves.toBe(3);
 });

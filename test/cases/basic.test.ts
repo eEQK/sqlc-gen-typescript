@@ -1,5 +1,5 @@
 import { db, gen, prepare, sql } from "../case";
-import { expect, test } from "bun:test";
+import { expect, it } from "bun:test";
 
 await prepare(sql`
     -- name: GetFirstAuthorId :one
@@ -15,25 +15,25 @@ await prepare(sql`
     select power(@a, 2);
 `);
 
-test("returns numbers from select", async () => {
+it("returns numbers from select", async () => {
 	const result = await gen().getFirstAuthorId(db);
 	expect(result).toBe(1);
 	expect(result).toBeTypeOf("number");
 });
 
-test("returns numbers from functions", async () => {
+it("returns numbers from functions", async () => {
 	const result = await gen().count(db);
 	expect(result).toBe(3);
 	expect(result).toBeTypeOf("number");
 });
 
-test("returns dates from select", async () => {
+it("returns dates from select", async () => {
 	const result = await gen().getDate(db);
 	expect(result).toEqual(new Date("1990-02-09T00:00:00.000Z"));
 	expect(result).toBeTypeOf("object");
 });
 
-test("accepts parameters", async () => {
+it("accepts parameters", async () => {
 	const result = await gen().square(db, { a: 3 });
 	expect(result).toBe(9);
 	expect(result).toBeTypeOf("number");

@@ -20,7 +20,6 @@ const typeMapping = {
 		"cid",
 		"cidr",
 		"circle",
-		"citext",
 		"inet",
 		"interval",
 		"line",
@@ -324,18 +323,7 @@ export class Driver {
 									],
 									undefined,
 									factory.createToken(SyntaxKind.EqualsGreaterThanToken),
-									factory.createObjectLiteralExpression(
-										columns.map((col, i) =>
-											factory.createPropertyAssignment(
-												factory.createIdentifier(colName(i, col)),
-												factory.createElementAccessExpression(
-													factory.createIdentifier("row"),
-													factory.createNumericLiteral(`${i}`),
-												),
-											),
-										),
-										true,
-									),
+									this.buildResultExpression(columns),
 								),
 							],
 						),
@@ -467,29 +455,25 @@ export class Driver {
 						),
 						undefined,
 					),
-					this.buildReturnStatement(columns),
+					factory.createReturnStatement(this.buildResultExpression(columns)),
 				],
 				true,
 			),
 		);
 	}
 
-	buildReturnStatement(columns: Column[]) {
+	buildResultExpression(columns: Column[]) {
 		if (columns.length === 1) {
-			return factory.createReturnStatement(
-				this.buildColumnAccessExpression(columns[0], "row", 0),
-			);
+			return this.buildColumnAccessExpression(columns[0], "row", 0);
 		}
-		return factory.createReturnStatement(
-			factory.createObjectLiteralExpression(
-				columns.map((col, i) =>
-					factory.createPropertyAssignment(
-						factory.createIdentifier(colName(i, col)),
-						this.buildColumnAccessExpression(col, "row", i),
-					),
+		return factory.createObjectLiteralExpression(
+			columns.map((col, i) =>
+				factory.createPropertyAssignment(
+					factory.createIdentifier(colName(i, col)),
+					this.buildColumnAccessExpression(col, "row", i),
 				),
-				true,
 			),
+			true,
 		);
 	}
 
