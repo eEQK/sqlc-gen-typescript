@@ -1,41 +1,37 @@
-DROP TABLE IF EXISTS authors;
+drop table if exists authors;
 
-CREATE TABLE authors (
-  id   BIGSERIAL PRIMARY KEY,
-  name text      NOT NULL,
-  bio  text,
-  born DATE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+create table authors
+(
+    id         bigserial primary key,
+    name       text not null,
+    bio        text,
+    born       date,
+    created_at timestamptz default now()
 );
 
-INSERT INTO authors (name, bio, born) VALUES 
-  ('John Doe', 'A mysterious author', '1990-02-09'),
-  ('Jane Doe', 'Another mysterious author', null),
-  ('Alice', 'A wonderful author', null),
-  ('Bob', 'A great author', null),
-  ('Charlie', 'A fantastic author', null),
-  ('David', 'A brilliant author', null),
-  ('Eve', 'A genius author', null),
-  ('Frank', 'A smart author', null),
-  ('Grace', 'A wise author', null),
-  ('Heidi', 'A clever author', null),
-  ('Ivan', 'A talented author', null),
-  ('Judy', 'A gifted author', null),
-  ('Kevin', 'A skilled author', null),
-  ('Linda', 'A skilled author', null),
-  ('Michael', 'A skilled author', null),
-  ('Nancy', 'A skilled author', null),
-  ('Oscar', 'A skilled author', null),
-  ('Peggy', 'A skilled author', null),
-  ('Quincy', 'A skilled author', null),
-  ('Rita', 'A skilled author', null),
-  ('Steve', 'A skilled author', null),
-  ('Tina', 'A skilled author', null),
-  ('Ursula', 'A skilled author', null),
-  ('Victor', 'A skilled author', null),
-  ('Wendy', 'A skilled author', null),
-  ('Xavier', 'A skilled author', null),
-  ('Yvonne', 'A skilled author', null),
-  ('Zack', 'A skilled author', null);
+insert into authors (name, bio, born)
+values ('John Doe', 'A mysterious author', '1990-02-09'),
+       ('Jane Doe', 'Another mysterious author', null),
+       ('Alice', 'A wonderful author', null),
+       ('Bob', 'A great author', null),
+       ('Charlie', 'A fantastic author', null),
+       ('David', 'A brilliant author', null);
 
 
+drop table if exists emails;
+drop domain if exists email;
+
+create extension if not exists citext;
+create domain email as citext constraint proper_email check (value ~*
+                                                             '^[a-za-z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-za-z0-9](?:[a-za-z0-9-]{0,61}[a-za-z0-9])?(?:\.[a-za-z0-9](?:[a-za-z0-9-]{0,61}[a-za-z0-9])?)*$');
+create table emails
+(
+    id  bigserial primary key,
+    em1 citext not null,
+    em2 email  not null
+);
+
+insert into emails (em1, em2)
+values ('foo@gmail.com', 'foo+1@gmail.com'),
+       ('bar@gmail.com', 'bar+1@gmail.com'),
+       ('baz@gmail.com', 'baz+1@gmail.com');

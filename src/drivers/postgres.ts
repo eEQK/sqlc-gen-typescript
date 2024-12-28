@@ -13,9 +13,13 @@ import { argName, colName } from "./utlis";
 
 const typeMapping = {
 	string: [
+		// resolve this to string as a special case
+		"unknown",
+
 		"aclitem",
 		"bit",
 		"box",
+		"citext",
 		"bpchar",
 		"cid",
 		"cidr",
@@ -72,7 +76,6 @@ const typeMapping = {
 	Buffer: ["bytea"],
 	boolean: ["bool"],
 	any: ["json", "jsonb"],
-	unknown: ["unknown"],
 };
 
 function funcParamsDecl(iface: string | undefined, params: Parameter[]) {
@@ -120,7 +123,7 @@ export class Driver {
 			}
 		}
 
-		return "unknown";
+		return "string";
 	}
 
 	createColumnTypeNode(column?: Column): TypeNode {
@@ -155,7 +158,7 @@ export class Driver {
 		} else if (type === "any") {
 			keyword = factory.createKeywordTypeNode(SyntaxKind.AnyKeyword);
 		} else {
-			keyword = factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword);
+			keyword = factory.createKeywordTypeNode(SyntaxKind.StringKeyword);
 		}
 
 		if (column.isArray || column.arrayDims > 0) {

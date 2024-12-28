@@ -4,13 +4,10 @@ import { expect, it } from "bun:test";
 await prepare(sql`
     -- name: GetFirstAuthorId :one
     select id from authors where id = 1;
-
     -- name: Count :one
     select count(*) from (values (1), (4), (7)) as t(id);
-
     -- name: GetDate :one
     select born from authors where id = 1;
-
     -- name: Square :one
     select power(@a, 2);
 `);
