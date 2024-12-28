@@ -20,6 +20,7 @@ const typeMapping = {
 		"cid",
 		"cidr",
 		"circle",
+		"citext",
 		"inet",
 		"interval",
 		"line",
