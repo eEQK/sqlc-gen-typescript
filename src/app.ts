@@ -38,7 +38,6 @@ const result = codegen(input);
 writeOutput(result);
 
 interface Options {
-	runtime?: string;
 	driver?: string;
 }
 

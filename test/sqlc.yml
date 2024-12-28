@@ -1,0 +1,14 @@
+version: "2"
+plugins:
+- name: ts
+  wasm:
+    url: file://../plugin.wasm
+sql:
+- schema: "schema.sql"
+  queries: "./cases/*.sql"
+  engine: "postgresql"
+  codegen:
+  - plugin: ts
+    out: cases
+    options:
+      driver: postgres

@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: sqlc_test
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    ports:
+      - "5439:5432"
+

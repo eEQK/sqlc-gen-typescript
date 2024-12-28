@@ -2,7 +2,7 @@ version: "2"
 plugins:
 - name: ts
   wasm:
-    url: file://plugin.wasm
+    url: file://../plugin.wasm
 sql:
 - schema: "authors/postgresql/schema.sql"
   queries: "authors/postgresql/query*.sql"

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "test",
+  "dependencies": {
+    "postgres": "^3.4.5"
+  },
+  "scripts": {
+    "test": "bun run prepare.ts && bun test",
+    "clean": "rm cases/*.sql cases/*_sql.ts"
+  }
+}
