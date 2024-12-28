@@ -14,14 +14,14 @@ WHERE id = $1 LIMIT 1`;
         name: string;
         bio: string | null;
     }
-    export async function getAuthor(sql: Sql, args: GetAuthorArgs): Promise<GetAuthorRow> {
+    export async function getAuthor(sql: Sql, args: GetAuthorArgs): Promise<GetAuthorRow | null> {
         const rows = await sql.unsafe(getAuthorQuery, [args.id]).values();
         if (rows.length !== 1) {
-            throw new Error(`expected 1 row, got ${rows.length}`);
+            return null;
         }
         const row = rows[0];
         if (!row) {
-            throw new Error("query returned empty row");
+            return null;
         }
         return {
             id: row[0],
@@ -50,27 +50,27 @@ where id = $1 limit 1`;
     export interface GetNameByIdArgs {
         id: number;
     }
-    export async function getNameById(sql: Sql, args: GetNameByIdArgs): Promise<string> {
+    export async function getNameById(sql: Sql, args: GetNameByIdArgs): Promise<string | null> {
         const rows = await sql.unsafe(getNameByIdQuery, [args.id]).values();
         if (rows.length !== 1) {
-            throw new Error(`expected 1 row, got ${rows.length}`);
+            return null;
         }
         const row = rows[0];
         if (!row) {
-            throw new Error("query returned empty row");
+            return null;
         }
         return row[0];
     }
     const getCountQuery = `-- name: GetCount :one
 SELECT count(id) FROM authors`;
-    export async function getCount(sql: Sql): Promise<number> {
+    export async function getCount(sql: Sql): Promise<number | null> {
         const rows = await sql.unsafe(getCountQuery, []).values();
         if (rows.length !== 1) {
-            throw new Error(`expected 1 row, got ${rows.length}`);
+            return null;
         }
         const row = rows[0];
         if (!row) {
-            throw new Error("query returned empty row");
+            return null;
         }
         return row[0];
     }

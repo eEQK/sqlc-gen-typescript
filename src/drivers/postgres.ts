@@ -363,10 +363,13 @@ export class Driver {
 			undefined,
 			funcParams,
 			factory.createTypeReferenceNode(factory.createIdentifier("Promise"), [
-				factory.createTypeReferenceNode(
-					factory.createIdentifier(returnIface),
-					undefined,
-				),
+				factory.createUnionTypeNode([
+					factory.createTypeReferenceNode(
+						factory.createIdentifier(returnIface),
+						undefined,
+					),
+					factory.createLiteralTypeNode(factory.createNull()),
+				]),
 			]),
 			factory.createBlock(
 				[
@@ -428,28 +431,7 @@ export class Driver {
 							factory.createNumericLiteral("1"),
 						),
 						factory.createBlock(
-							[
-								factory.createThrowStatement(
-									factory.createNewExpression(
-										factory.createIdentifier("Error"),
-										undefined,
-										[
-											factory.createTemplateExpression(
-												factory.createTemplateHead("expected 1 row, got "),
-												[
-													factory.createTemplateSpan(
-														factory.createPropertyAccessExpression(
-															factory.createIdentifier("rows"),
-															factory.createIdentifier("length"),
-														),
-														factory.createTemplateTail(""),
-													),
-												],
-											),
-										],
-									),
-								),
-							],
+							[factory.createReturnStatement(factory.createNull())],
 							true,
 						),
 						undefined,
@@ -477,15 +459,7 @@ export class Driver {
 							factory.createIdentifier("row"),
 						),
 						factory.createBlock(
-							[
-								factory.createThrowStatement(
-									factory.createNewExpression(
-										factory.createIdentifier("Error"),
-										undefined,
-										[factory.createStringLiteral("query returned empty row")],
-									),
-								),
-							],
+							[factory.createReturnStatement(factory.createNull())],
 							true,
 						),
 						undefined,
