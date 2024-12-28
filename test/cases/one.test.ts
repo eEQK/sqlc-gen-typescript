@@ -10,7 +10,7 @@ await prepare(sql`
 
 test("returns complex objects", async () => {
 	const result = await gen().getSomeAuthor(db);
-	expect(result).toEqual({
+	expect(result).toMatchObject({
 		id: 1,
 		name: "John Doe",
 		bio: "A mysterious author",

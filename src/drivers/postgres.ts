@@ -4,10 +4,11 @@ import {
 	SyntaxKind,
 	type TypeNode,
 	factory,
+	type Expression,
+	type ExpressionStatement,
 } from "typescript";
 
 import type { Column, Parameter } from "../gen/plugin/codegen_pb";
-import { log } from "../logger";
 import { argName, colName } from "./utlis";
 
 const typeMapping = {
@@ -108,11 +109,14 @@ function funcParamsDecl(iface: string | undefined, params: Parameter[]) {
 	return funcParams;
 }
 
+type KeyOf<T> = T extends Record<infer K, unknown> ? K : never;
+type Types = KeyOf<typeof typeMapping>;
+
 export class Driver {
-	parseDatabaseType(type: string): string {
+	parseDatabaseType(type: string): Types {
 		for (const [key, value] of Object.entries(typeMapping)) {
 			if (value.includes(type)) {
-				return key;
+				return key as Types;
 			}
 		}
 
@@ -131,9 +135,7 @@ export class Driver {
 		}
 		const type = this.parseDatabaseType(pgType);
 
-		let keyword: TypeNode = factory.createKeywordTypeNode(
-			SyntaxKind.StringKeyword,
-		);
+		let keyword: TypeNode;
 		if (type === "string") {
 			keyword = factory.createKeywordTypeNode(SyntaxKind.StringKeyword);
 		} else if (type === "number") {
@@ -152,8 +154,8 @@ export class Driver {
 			);
 		} else if (type === "any") {
 			keyword = factory.createKeywordTypeNode(SyntaxKind.AnyKeyword);
-		} else if (type === "unknown") {
-			log(`unknown type ${column.type?.name}`);
+		} else {
+			keyword = factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword);
 		}
 
 		if (column.isArray || column.arrayDims > 0) {
@@ -474,10 +476,7 @@ export class Driver {
 	buildReturnStatement(columns: Column[]) {
 		if (columns.length === 1) {
 			return factory.createReturnStatement(
-				factory.createElementAccessExpression(
-					factory.createIdentifier("row"),
-					factory.createNumericLiteral(0),
-				),
+				this.buildColumnAccessExpression(columns[0], "row", 0),
 			);
 		}
 		return factory.createReturnStatement(
@@ -485,15 +484,44 @@ export class Driver {
 				columns.map((col, i) =>
 					factory.createPropertyAssignment(
 						factory.createIdentifier(colName(i, col)),
-						factory.createElementAccessExpression(
-							factory.createIdentifier("row"),
-							factory.createNumericLiteral(`${i}`),
-						),
+						this.buildColumnAccessExpression(col, "row", i),
 					),
 				),
 				true,
 			),
 		);
+	}
+
+	buildColumnAccessExpression(
+		column: Column,
+		name: string,
+		i: number,
+	): Expression {
+		const access = factory.createElementAccessExpression(
+			factory.createIdentifier(name),
+			factory.createNumericLiteral(i),
+		);
+
+		let expr: ExpressionStatement | undefined;
+		const type = this.parseDatabaseType(column.type?.name ?? "");
+		function castTo(type: string, expr: Expression, isNew = false) {
+			return factory.createExpressionStatement(
+				(isNew ? factory.createNewExpression : factory.createCallExpression)(
+					factory.createIdentifier(type),
+					undefined,
+					[expr],
+				),
+			);
+		}
+		if (type === "number") {
+			expr = castTo("Number", access);
+		} else if (type === "boolean") {
+			expr = castTo("Boolean", access);
+		} else if (type === "Date") {
+			expr = castTo("Date", access, true);
+		}
+
+		return expr?.expression ?? access;
 	}
 
 	execlastidDecl(

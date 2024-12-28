@@ -2,26 +2,35 @@ import { db, gen, prepare, sql } from "../case";
 import { expect, test } from "bun:test";
 
 await prepare(sql`
-    -- name: Sum :one
-    select 1 + 1;
+    -- name: GetFirstAuthorId :one
+    select id from authors where id = 1;
 
     -- name: Count :one
     select count(*) from (values (1), (4), (7)) as t(id);
+
+    -- name: GetDate :one
+    select born from authors where id = 1;
 
     -- name: Square :one
     select power(@a, 2);
 `);
 
-test("returns simple values", async () => {
-	const result = await gen().sum(db);
-	expect(result).toBe(2);
+test("returns numbers from select", async () => {
+	const result = await gen().getFirstAuthorId(db);
+	expect(result).toBe(1);
 	expect(result).toBeTypeOf("number");
 });
 
-test("returns simple values from functions", async () => {
+test("returns numbers from functions", async () => {
 	const result = await gen().count(db);
 	expect(result).toBe(3);
 	expect(result).toBeTypeOf("number");
+});
+
+test("returns dates from select", async () => {
+	const result = await gen().getDate(db);
+	expect(result).toEqual(new Date("1990-02-09T00:00:00.000Z"));
+	expect(result).toBeTypeOf("object");
 });
 
 test("accepts parameters", async () => {
