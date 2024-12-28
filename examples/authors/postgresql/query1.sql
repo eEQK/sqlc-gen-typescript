@@ -14,6 +14,9 @@ ORDER BY name;
 SELECT name FROM authors
 where id = $1 limit 1;
 
+-- name: GetCount :one
+SELECT count(id) FROM authors;
+
 -- name: Read_Nested_List :many
 SELECT * FROM authors
 ORDER BY name;

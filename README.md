@@ -45,7 +45,7 @@ WHERE id = $1 LIMIT 1;
 const name = await Authors.get(sql, {id: 1});
 typeof name // string
 
-await Authors.get(sql, {id: 9999}); // error thrown
+await Authors.get(sql, {id: nonExistingId}); // error
 ```
 
 ### Export specific queries in a module

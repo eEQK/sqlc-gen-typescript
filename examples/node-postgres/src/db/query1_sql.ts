@@ -7,10 +7,10 @@ export module Read {
 SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1`;
     export interface GetAuthorArgs {
-        id: string;
+        id: number;
     }
     export interface GetAuthorRow {
-        id: string;
+        id: number;
         name: string;
         bio: string | null;
     }
@@ -33,7 +33,7 @@ WHERE id = $1 LIMIT 1`;
 SELECT id, name, bio FROM authors
 ORDER BY name`;
     export interface ListAuthorsRow {
-        id: string;
+        id: number;
         name: string;
         bio: string | null;
     }
@@ -48,10 +48,23 @@ ORDER BY name`;
 SELECT name FROM authors
 where id = $1 limit 1`;
     export interface GetNameByIdArgs {
-        id: string;
+        id: number;
     }
     export async function getNameById(sql: Sql, args: GetNameByIdArgs): Promise<string> {
         const rows = await sql.unsafe(getNameByIdQuery, [args.id]).values();
+        if (rows.length !== 1) {
+            throw new Error(`expected 1 row, got ${rows.length}`);
+        }
+        const row = rows[0];
+        if (!row) {
+            throw new Error("query returned empty row");
+        }
+        return row[0];
+    }
+    const getCountQuery = `-- name: GetCount :one
+SELECT count(id) FROM authors`;
+    export async function getCount(sql: Sql): Promise<number> {
+        const rows = await sql.unsafe(getCountQuery, []).values();
         if (rows.length !== 1) {
             throw new Error(`expected 1 row, got ${rows.length}`);
         }
@@ -66,7 +79,7 @@ where id = $1 limit 1`;
 SELECT id, name, bio FROM authors
 ORDER BY name`;
         export interface ListRow {
-            id: string;
+            id: number;
             name: string;
             bio: string | null;
         }

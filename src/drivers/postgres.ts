@@ -13,7 +13,6 @@ import { argName, colName } from "./utlis";
 const typeMapping = {
 	string: [
 		"aclitem",
-		"bigserial",
 		"bit",
 		"box",
 		"bpchar",
@@ -49,6 +48,14 @@ const typeMapping = {
 		"xml",
 	],
 	number: [
+		"bigint",
+		"bigserial",
+		"smallserial",
+		"double precision",
+		"real",
+		"decimal",
+		"integer",
+		"smallint",
 		"int2",
 		"int4",
 		"int8",

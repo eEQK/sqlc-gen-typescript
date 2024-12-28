@@ -7,7 +7,7 @@ export module Update {
 DELETE FROM authors
 WHERE id = $1`;
     export interface DeleteAuthorArgs {
-        id: string;
+        id: number;
     }
     export async function deleteAuthor(sql: Sql, args: DeleteAuthorArgs): Promise<void> {
         await sql.unsafe(deleteAuthorQuery, [args.id]);
@@ -24,7 +24,7 @@ RETURNING id, name, bio`;
         bio: string | null;
     }
     export interface CreateAuthorRow {
-        id: string;
+        id: number;
         name: string;
         bio: string | null;
     }
