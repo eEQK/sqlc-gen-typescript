@@ -82,18 +82,9 @@ interface Driver {
 
 function createNodeGenerator(options: Options): Driver {
 	switch (options.driver) {
-		// case "mysql2": {
-		// 	return new MysqlDriver(options.mysql2);
-		// }
-		// case "pg": {
-		// 	return new PgDriver();
-		// }
 		case "postgres": {
 			return new PostgresDriver();
 		}
-		// case "better-sqlite3": {
-		// 	return new Sqlite3Driver();
-		// }
 	}
 	throw new Error(`unknown driver: ${options.driver}`);
 }

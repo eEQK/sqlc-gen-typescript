@@ -33,7 +33,8 @@ and I'll focus on achieving that here.
 
 I encourage anyone interested to incorporate changes from this fork into the main repo.
 
-### Returning values directly from selects with single column
+### Return values directly from selects with single column
+### Return non nullable results for `:one` queries
 ```sql
 -- name: GetName :one
 SELECT name FROM authors
@@ -41,8 +42,10 @@ WHERE id = $1 LIMIT 1;
 ```
 
 ```typescript
-const name = Authors.get(sql, {id: 1});
+const name = await Authors.get(sql, {id: 1});
 typeof name // string
+
+await Authors.get(sql, {id: 9999}); // error thrown
 ```
 
 ### Export specific queries in a module
@@ -61,8 +64,8 @@ ORDER BY name;
 ```
 
 ```typescript
-const someAuthor = Authors.get(sql);
-const authors = Authors.list(sql);
+const someAuthor = await Authors.get(sql);
+const authors = await Authors.list(sql);
 ```
 
 ### Export queries in a module
@@ -89,9 +92,9 @@ ORDER BY name;
 ```
 
 ```typescript
-const someAuthor = Authors.get(sql);
-const authors = Authors.list(sql);
-const nested = Authors.Nested.list(sql);
+const someAuthor = await Authors.get(sql, {id: 1});
+const authors = await Authors.list(sql);
+const nested = await Authors.Nested.list(sql);
 ```
 
 The namespace option:

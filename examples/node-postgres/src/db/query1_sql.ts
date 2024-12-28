@@ -14,14 +14,14 @@ WHERE id = $1 LIMIT 1`;
         name: string;
         bio: string | null;
     }
-    export async function getAuthor(sql: Sql, args: GetAuthorArgs): Promise<GetAuthorRow | null> {
+    export async function getAuthor(sql: Sql, args: GetAuthorArgs): Promise<GetAuthorRow> {
         const rows = await sql.unsafe(getAuthorQuery, [args.id]).values();
         if (rows.length !== 1) {
-            return null;
+            throw new Error(`expected 1 row, got ${rows.length}`);
         }
         const row = rows[0];
         if (!row) {
-            return null;
+            throw new Error("query returned empty row");
         }
         return {
             id: row[0],
@@ -50,14 +50,14 @@ where id = $1 limit 1`;
     export interface GetNameByIdArgs {
         id: string;
     }
-    export async function getNameById(sql: Sql, args: GetNameByIdArgs): Promise<string | null> {
+    export async function getNameById(sql: Sql, args: GetNameByIdArgs): Promise<string> {
         const rows = await sql.unsafe(getNameByIdQuery, [args.id]).values();
         if (rows.length !== 1) {
-            return null;
+            throw new Error(`expected 1 row, got ${rows.length}`);
         }
         const row = rows[0];
         if (!row) {
-            return null;
+            throw new Error("query returned empty row");
         }
         return row[0];
     }

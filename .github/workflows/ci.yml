@@ -59,7 +59,7 @@ jobs:
         asset_path: examples/sqlc-gen-typescript_dev.wasm.sha256
         asset_name: sqlc-gen-typescript_dev.wasm.sha256
         asset_content_type: text/plain
-    - name: Update Release Description with SHA256
+    - name: Update Release Description with SHA256 and Commits
       uses: actions/github-script@v4
       env:
         tag: ${{ steps.vars.outputs.tag_name }}
@@ -68,20 +68,67 @@ jobs:
       with:
         script: |
           const { tag, sha256 } = process.env;
+
+          // Retrieve all releases to identify current and previous releases
+          const { data: releases } = await github.repos.listReleases({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+
+          // Find the current release
+          const currentRelease = releases.find(r => r.tag_name === tag);
+          if (!currentRelease) {
+            throw new Error(`Cannot find release for tag ${tag}`);
+          }
+
+          // Sort releases by creation date, descending
+          const sortedReleases = releases.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          // Find the current release index, then take the next release as the previous
+          const currentIndex = sortedReleases.findIndex(r => r.id === currentRelease.id);
+          const previousRelease = sortedReleases[currentIndex + 1];
+
+          let commitsDescription = "";
+          // If theres a previous release, compare commits; otherwise note that no previous release was found
+          if (previousRelease) {
+            const { data: compare } = await github.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: previousRelease.tag_name,
+              head: tag
+            });
+
+            // Build a simple list of commit messages and short SHAs
+            commitsDescription = compare.commits
+              .map(commit => `- ${commit.commit.message} (${commit.sha.substring(0, 7)})`)
+              .join("\n");
+          } else {
+            commitsDescription = "No previous release found.";
+          }
+
+          // Retrieve the current release details by its tag
           const { data: release } = await github.repos.getReleaseByTag({
             owner: context.repo.owner,
             repo: context.repo.repo,
             tag: tag
           });
-          await github.repos.updateRelease({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            release_id: release.id,
-            body: `\`\`\`yml
+
+          // Construct the new body with plugin info and commit list
+          const newBody = `\`\`\`yml
           plugins:
           - name: ts
             wasm:
               url: https://github.com/eEQK/sqlc-gen-typescript/releases/download/${tag}/sqlc-gen-typescript_dev.wasm
               sha256: ${sha256}
-          \`\`\``
-          });
+          \`\`\`
+
+          Commits since last release:
+          ${commitsDescription}
+          `;
+
+                // Update the release description
+                await github.repos.updateRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: release.id,
+                  body: newBody
+                });

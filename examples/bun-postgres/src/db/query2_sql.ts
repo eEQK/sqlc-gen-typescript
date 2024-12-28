@@ -28,14 +28,14 @@ RETURNING id, name, bio`;
         name: string;
         bio: string | null;
     }
-    export async function createAuthor(sql: Sql, args: CreateAuthorArgs): Promise<CreateAuthorRow | null> {
+    export async function createAuthor(sql: Sql, args: CreateAuthorArgs): Promise<CreateAuthorRow> {
         const rows = await sql.unsafe(createAuthorQuery, [args.name, args.bio]).values();
         if (rows.length !== 1) {
-            return null;
+            throw new Error(`expected 1 row, got ${rows.length}`);
         }
         const row = rows[0];
         if (!row) {
-            return null;
+            throw new Error("query returned empty row");
         }
         return {
             id: row[0],
