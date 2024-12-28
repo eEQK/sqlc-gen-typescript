@@ -33,8 +33,15 @@ and I'll focus on achieving that here.
 
 I encourage anyone interested to incorporate changes from this fork into the main repo.
 
+### Resolve values to correct types
+In upstream, the query below returns `'1'` (a string). In this fork it is `1` (a number) instead.
+
+```sql
+-- name: GetNumber :one
+SELECT 1::int
+```
+
 ### Return values directly from selects with single column
-### Return non nullable results for `:one` queries
 ```sql
 -- name: GetName :one
 SELECT name FROM authors
@@ -44,8 +51,6 @@ WHERE id = $1 LIMIT 1;
 ```typescript
 const name = await Authors.get(sql, {id: 1});
 typeof name // string
-
-await Authors.get(sql, {id: nonExistingId}); // error
 ```
 
 ### Export specific queries in a module
