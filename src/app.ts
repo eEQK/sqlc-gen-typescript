@@ -3,7 +3,7 @@
 //
 // @ts-expect-error
 import { STDIO, readFileSync, writeFileSync } from "javy/fs";
-import {
+import ts, {
 	EmitHint,
 	NewLineKind,
 	type Node,
@@ -225,6 +225,7 @@ ${query.text.trim()}`,
 							[factory.createToken(SyntaxKind.ExportKeyword)],
 							factory.createIdentifier(queryNs),
 							factory.createModuleBlock(nodesToPush),
+							ts.NodeFlags.Namespace,
 						),
 					);
 				} else {
@@ -239,6 +240,7 @@ ${query.text.trim()}`,
 					[factory.createToken(SyntaxKind.ExportKeyword)],
 					factory.createIdentifier(fileNs),
 					factory.createModuleBlock(nodes),
+					ts.NodeFlags.Namespace,
 				),
 			];
 		}

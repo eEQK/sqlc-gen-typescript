@@ -2,7 +2,7 @@
 
 import { Sql } from "postgres";
 
-export module Read {
+export namespace Read {
     const getAuthorQuery = `-- name: Read_GetAuthor :one
 SELECT id, name, bio FROM authors
 WHERE id = $1 LIMIT 1`;
@@ -24,7 +24,7 @@ WHERE id = $1 LIMIT 1`;
             return null;
         }
         return {
-            id: row[0],
+            id: Number(row[0]),
             name: row[1],
             bio: row[2]
         };
@@ -39,7 +39,7 @@ ORDER BY name`;
     }
     export async function listAuthors(sql: Sql): Promise<ListAuthorsRow[]> {
         return (await sql.unsafe(listAuthorsQuery, []).values()).map(row => ({
-            id: row[0],
+            id: Number(row[0]),
             name: row[1],
             bio: row[2]
         }));
@@ -72,9 +72,9 @@ SELECT count(id) FROM authors`;
         if (!row) {
             return null;
         }
-        return row[0];
+        return Number(row[0]);
     }
-    export module Nested {
+    export namespace Nested {
         const listQuery = `-- name: Read_Nested_List :many
 SELECT id, name, bio FROM authors
 ORDER BY name`;
@@ -85,7 +85,7 @@ ORDER BY name`;
         }
         export async function list(sql: Sql): Promise<ListRow[]> {
             return (await sql.unsafe(listQuery, []).values()).map(row => ({
-                id: row[0],
+                id: Number(row[0]),
                 name: row[1],
                 bio: row[2]
             }));

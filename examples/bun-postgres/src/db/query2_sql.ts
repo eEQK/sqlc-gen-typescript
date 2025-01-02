@@ -2,7 +2,7 @@
 
 import { Sql } from "postgres";
 
-export module Update {
+export namespace Update {
     const deleteAuthorQuery = `-- name: Update_DeleteAuthor :exec
 DELETE FROM authors
 WHERE id = $1`;
@@ -38,7 +38,7 @@ RETURNING id, name, bio`;
             return null;
         }
         return {
-            id: row[0],
+            id: Number(row[0]),
             name: row[1],
             bio: row[2]
         };
