@@ -11,10 +11,10 @@ for (const c of cases) {
 	await $`bun run ${c} prepare`;
 }
 
-const dbStatus = await $`pg_isready -h localhost -p 5439`;
-if (dbStatus.exitCode !== 0) {
-    // when running in CI, the database will be up already
-    await $`docker compose up -d`;
+try {
+	await $`pg_isready -h localhost -p 5439`;
+} catch (e) {
+	await $`docker compose up -d`;
 }
 
 await $`sqlc generate`;
