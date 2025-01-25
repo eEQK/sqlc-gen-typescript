@@ -1,5 +1,5 @@
-import { db, gen, prepare, sql } from "../case";
 import { describe, expect, it } from "bun:test";
+import { db, gen, prepare, sql } from "../case";
 
 await prepare(sql`
     -- name: GetAuthors :many

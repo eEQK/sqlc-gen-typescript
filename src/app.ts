@@ -66,7 +66,7 @@ interface Driver {
 		returnIface: string,
 		params: Parameter[],
 		columns: Column[],
-		namespace?: string,
+		embeds: Map<string, Column[]>,
 	) => Statement;
 	oneDecl: (
 		name: string,
@@ -75,7 +75,7 @@ interface Driver {
 		returnIface: string,
 		params: Parameter[],
 		columns: Column[],
-		namespace?: string,
+		embeds: Map<string, Column[]>,
 	) => Statement;
 }
 
@@ -149,6 +149,36 @@ ${query.text.trim()}`,
 				),
 			);
 
+			const embeds: Map<string, Column[]> = new Map();
+			for (const column of query.columns) {
+				const embedTable = column.embedTable;
+				if (embedTable === undefined) {
+					continue;
+				}
+
+				const catalog = input.catalog;
+				if (!catalog) {
+					throw new Error("catalog is required");
+				}
+
+				const schemaName = embedTable.schema
+					? embedTable.schema
+					: catalog.defaultSchema;
+				const schema = catalog.schemas.find((s) => s.name === schemaName);
+				if (!schema) {
+					throw new Error(`schema ${schemaName} not found`);
+				}
+
+				const table = schema.tables.find(
+					(t) => t.rel?.name === embedTable.name,
+				);
+				if (!table) {
+					throw new Error(`table ${embedTable.name} not found`);
+				}
+
+				embeds.set(column.name, table.columns);
+			}
+
 			let argIface = undefined;
 			let returnIface = undefined;
 			if (query.params.length > 0) {
@@ -161,7 +191,7 @@ ${query.text.trim()}`,
 				);
 			} else if (query.columns.length > 1) {
 				returnIface = `${nameWithoutFileNs}Row`;
-				nodesToPush.push(rowDecl(returnIface, driver, query.columns));
+				nodesToPush.push(rowDecl(returnIface, driver, query.columns, embeds));
 			}
 
 			switch (query.cmd) {
@@ -198,7 +228,7 @@ ${query.text.trim()}`,
 							returnIface ?? "void",
 							query.params,
 							query.columns,
-							queryNs,
+							embeds,
 						),
 					);
 					break;
@@ -212,7 +242,7 @@ ${query.text.trim()}`,
 							returnIface ?? "void",
 							query.params,
 							query.columns,
-							queryNs,
+							embeds,
 						),
 					);
 					break;
@@ -300,20 +330,44 @@ function argsDecl(name: string, driver: Driver, params: Parameter[]) {
 	);
 }
 
-function rowDecl(name: string, driver: Driver, columns: Column[]) {
+function rowDecl(
+	name: string,
+	driver: Driver,
+	columns: Column[],
+	embeds: Map<string, Column[]>,
+) {
 	return factory.createInterfaceDeclaration(
 		[factory.createToken(SyntaxKind.ExportKeyword)],
 		factory.createIdentifier(name),
 		undefined,
 		undefined,
-		columns.map((column, i) =>
-			factory.createPropertySignature(
+		columns.map((column, i) => {
+			const embed = embeds.get(column.name);
+			if (!embed) {
+				return factory.createPropertySignature(
+					undefined,
+					factory.createIdentifier(colName(i, column)),
+					undefined,
+					driver.createColumnTypeNode(column),
+				);
+			}
+
+			return factory.createPropertySignature(
 				undefined,
-				factory.createIdentifier(colName(i, column)),
+				factory.createIdentifier(column.name),
 				undefined,
-				driver.createColumnTypeNode(column),
-			),
-		),
+				factory.createTypeLiteralNode(
+					embed.map((column, j) =>
+						factory.createPropertySignature(
+							undefined,
+							factory.createIdentifier(colName(i + j, column)),
+							undefined,
+							driver.createColumnTypeNode(column),
+						),
+					),
+				),
+			);
+		}),
 	);
 }
 

@@ -1,25 +1,23 @@
 {
-  "$schema": "https://json.schemastore.org/package.json",
-  "name": "experiment",
-  "version": "1.0.0",
-  "description": "",
-  "private": true,
-  "main": "app.js",
-  "scripts": {
-    "fmt": "bunx @biomejs/biome check --fix --unsafe",
-    "test": "make plugin.wasm && (cd test && bun run test)"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "esbuild": "^0.19.5",
-    "typescript": "^5.2.2"
-  },
-  "workspaces": [
-    "test"
-  ],
-  "dependencies": {
-    "@bufbuild/protobuf": "^1.4.2",
-    "javy": "^0.1.2"
-  }
+	"$schema": "https://json.schemastore.org/package.json",
+	"name": "experiment",
+	"version": "1.0.0",
+	"description": "",
+	"private": true,
+	"main": "app.js",
+	"scripts": {
+		"fmt": "bunx @biomejs/biome check --fix --unsafe",
+		"test": "make plugin.wasm && (cd test && bun run test)"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"esbuild": "^0.19.5",
+		"typescript": "^5.2.2"
+	},
+	"workspaces": ["test"],
+	"dependencies": {
+		"@bufbuild/protobuf": "^1.4.2",
+		"javy": "^0.1.2"
+	}
 }

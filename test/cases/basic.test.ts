@@ -1,5 +1,5 @@
-import { db, gen, prepare, sql } from "../case";
 import { expect, it } from "bun:test";
+import { db, gen, prepare, sql } from "../case";
 
 await prepare(sql`
     -- name: GetFirstAuthorId :one

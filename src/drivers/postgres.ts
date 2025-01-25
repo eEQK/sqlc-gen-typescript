@@ -1,11 +1,11 @@
 import {
+	type Expression,
+	type ExpressionStatement,
 	type FunctionDeclaration,
 	NodeFlags,
 	SyntaxKind,
 	type TypeNode,
 	factory,
-	type Expression,
-	type ExpressionStatement,
 } from "typescript";
 
 import type { Column, Parameter } from "../gen/plugin/codegen_pb";
@@ -255,6 +255,7 @@ export class Driver {
 		returnIface: string,
 		params: Parameter[],
 		columns: Column[],
+		embeds: Map<string, Column[]>,
 	) {
 		const funcParams = funcParamsDecl(argIface, params);
 
@@ -326,7 +327,7 @@ export class Driver {
 									],
 									undefined,
 									factory.createToken(SyntaxKind.EqualsGreaterThanToken),
-									this.buildResultExpression(columns),
+									this.buildResultExpression(columns, embeds),
 								),
 							],
 						),
@@ -344,6 +345,7 @@ export class Driver {
 		returnIface: string,
 		params: Parameter[],
 		columns: Column[],
+		embeds: Map<string, Column[]>,
 	) {
 		const funcParams = funcParamsDecl(argIface, params);
 
@@ -458,14 +460,16 @@ export class Driver {
 						),
 						undefined,
 					),
-					factory.createReturnStatement(this.buildResultExpression(columns)),
+					factory.createReturnStatement(
+						this.buildResultExpression(columns, embeds),
+					),
 				],
 				true,
 			),
 		);
 	}
 
-	buildResultExpression(columns: Column[]) {
+	buildResultExpression(columns: Column[], embeds: Map<string, Column[]>) {
 		if (columns.length === 1) {
 			return this.buildColumnAccessExpression(columns[0], "row", 0);
 		}
@@ -473,7 +477,18 @@ export class Driver {
 			columns.map((col, i) =>
 				factory.createPropertyAssignment(
 					factory.createIdentifier(colName(i, col)),
-					this.buildColumnAccessExpression(col, "row", i),
+					!embeds.has(col.name)
+						? this.buildColumnAccessExpression(col, "row", i)
+						: factory.createObjectLiteralExpression(
+								embeds
+									.get(col.name)
+									?.map((embed, j) =>
+										factory.createPropertyAssignment(
+											factory.createIdentifier(colName(j, embed)),
+											this.buildColumnAccessExpression(embed, "row", i + j),
+										),
+									),
+							),
 				),
 			),
 			true,
