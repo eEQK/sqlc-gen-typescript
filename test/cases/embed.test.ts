@@ -14,7 +14,7 @@ describe("sqlc.embed", () => {
 		console.log(result);
 		expect(result.em1).toBe("foo@gmail.com");
 		expect(result.em1).toBeTypeOf("string");
-		expect(result.authors).toMatchObject({
+		expect(result.author).toMatchObject({
 			id: expect.any(Number),
 			name: "John Doe",
 			bio: "A mysterious author",

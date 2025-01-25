@@ -10,6 +10,7 @@ import {
 
 import type { Column, Parameter } from "../gen/plugin/codegen_pb";
 import { argName, colName } from "./utlis";
+import { singularize } from "inflected";
 
 const typeMapping = {
 	string: [
@@ -476,7 +477,7 @@ export class Driver {
 		return factory.createObjectLiteralExpression(
 			columns.map((col, i) =>
 				factory.createPropertyAssignment(
-					factory.createIdentifier(colName(i, col)),
+					factory.createIdentifier(singularize(colName(i, col))),
 					!embeds.has(col.name)
 						? this.buildColumnAccessExpression(col, "row", i)
 						: factory.createObjectLiteralExpression(

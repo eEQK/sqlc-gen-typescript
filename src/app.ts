@@ -29,6 +29,7 @@ import {
 
 import { Driver as PostgresDriver } from "./drivers/postgres";
 import { argName, colName } from "./drivers/utlis";
+import { singularize } from "inflected";
 
 // Read input from stdin
 const input = readInput();
@@ -354,7 +355,7 @@ function rowDecl(
 
 			return factory.createPropertySignature(
 				undefined,
-				factory.createIdentifier(column.name),
+				factory.createIdentifier(singularize(column.name)),
 				undefined,
 				factory.createTypeLiteralNode(
 					embed.map((column, j) =>
