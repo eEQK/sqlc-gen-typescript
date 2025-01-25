@@ -477,7 +477,11 @@ export class Driver {
 		return factory.createObjectLiteralExpression(
 			columns.map((col, i) =>
 				factory.createPropertyAssignment(
-					factory.createIdentifier(singularize(colName(i, col))),
+					factory.createIdentifier(
+						embeds.has(col.name)
+							? singularize(colName(i, col))
+							: colName(i, col),
+					),
 					!embeds.has(col.name)
 						? this.buildColumnAccessExpression(col, "row", i)
 						: factory.createObjectLiteralExpression(
