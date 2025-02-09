@@ -162,7 +162,11 @@ export class Driver {
 			keyword = factory.createKeywordTypeNode(SyntaxKind.StringKeyword);
 		}
 
-		if (column.isArray || column.arrayDims > 0) {
+		if (
+			column.type?.name === "anyarray" ||
+			column.isArray ||
+			column.arrayDims > 0
+		) {
 			const dims = Math.max(column.arrayDims || 1);
 			for (let i = 0; i < dims; i++) {
 				keyword = factory.createArrayTypeNode(keyword);

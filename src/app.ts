@@ -16,6 +16,7 @@ import ts, {
 	createPrinter,
 	createSourceFile,
 	factory,
+	addSyntheticLeadingComment,
 } from "typescript";
 
 import {
@@ -187,10 +188,15 @@ ${query.text.trim()}`,
 				nodesToPush.push(argsDecl(argIface, driver, query.params));
 			}
 			if (query.columns.length === 1) {
-				returnIface = driver.parseDatabaseType(
-					query.columns[0].type?.name ?? "",
+				const col = query.columns[0];
+				returnIface = driver.parseDatabaseType(col.type?.name ?? "");
+				addSyntheticLeadingComment(
+					nodesToPush.slice(-1)[0],
+					SyntaxKind.MultiLineCommentTrivia,
+					`${col.type.name}, ${col.arrayDims}: ${returnIface}`,
+					true,
 				);
-				if (query.columns[0].isArray) {
+				if (col.isArray || col.type?.name === "anyarray") {
 					returnIface += "[]";
 				}
 			} else if (query.columns.length > 1) {
