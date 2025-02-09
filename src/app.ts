@@ -181,7 +181,7 @@ ${query.text.trim()}`,
 			}
 
 			let argIface = undefined;
-			let returnIface = undefined;
+			let returnIface: string | undefined;
 			if (query.params.length > 0) {
 				argIface = `${nameWithoutFileNs}Args`;
 				nodesToPush.push(argsDecl(argIface, driver, query.params));
@@ -190,6 +190,9 @@ ${query.text.trim()}`,
 				returnIface = driver.parseDatabaseType(
 					query.columns[0].type?.name ?? "",
 				);
+				if (query.columns[0].isArray) {
+					returnIface += "[]";
+				}
 			} else if (query.columns.length > 1) {
 				returnIface = `${nameWithoutFileNs}Row`;
 				nodesToPush.push(rowDecl(returnIface, driver, query.columns, embeds));
