@@ -28,13 +28,11 @@ jobs:
         sqlc-version: '1.27.0'
     - uses: oven-sh/setup-bun@v2
     - run: wget https://github.com/bytecodealliance/javy/releases/download/v4.0.0/javy-x86_64-linux-v4.0.0.gz
-    - run: gzip -d javy-x86_64-linux-v4.0.0.gz
-    - run: chmod +x javy-x86_64-linux-v4.0.0
+    - run: gzip -d javy-x86_64-linux-v4.0.0.gz -c > ./javy
+    - run: chmod +x ./javy
     - run: bun install
-    - run: bun build --entrypoints ./src/app.ts --outfile=out.js --minify --target browser
-    - run: ./javy-x86_64-linux-v4.0.0 build out.js -o plugin.wasm
     - name: Run tests
-      run: cd test && bun run test
+      run: bun run test
     - id: calculate_sha256
       run: |
         sha256sum plugin.wasm > plugin.wasm.sha256
